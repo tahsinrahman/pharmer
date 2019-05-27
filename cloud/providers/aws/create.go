@@ -71,6 +71,12 @@ func (cm *ClusterManager) SetDefaultCluster(cluster *api.Cluster, config *api.Cl
 		"cloud-provider": cluster.Spec.Config.Cloud.CloudProvider,
 	}
 
+	if cluster.Spec.AuditSink {
+		cluster.Spec.Config.APIServerExtraArgs["audit-dynamic-configuration"] = "true"
+		cluster.Spec.Config.APIServerExtraArgs["feature-gates"] = "DynamicAuditing=true"
+		cluster.Spec.Config.APIServerExtraArgs["runtime-config"] = "auditregistration.k8s.io/v1alpha1=true"
+	}
+
 	// Init spec
 	cluster.Spec.Config.Cloud.Region = cluster.Spec.Config.Cloud.Zone[0 : len(cluster.Spec.Config.Cloud.Zone)-1]
 	cluster.Spec.Config.Cloud.SSHKeyName = n.GenSSHKeyExternalID()

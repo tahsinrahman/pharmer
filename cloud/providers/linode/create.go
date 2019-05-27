@@ -74,6 +74,12 @@ func (cm *ClusterManager) SetDefaultCluster(cluster *api.Cluster, config *api.Cl
 		}, ","),
 	}
 
+	if cluster.Spec.AuditSink {
+		cluster.Spec.Config.APIServerExtraArgs["audit-dynamic-configuration"] = "true"
+		cluster.Spec.Config.APIServerExtraArgs["feature-gates"] = "DynamicAuditing=true"
+		cluster.Spec.Config.APIServerExtraArgs["runtime-config"] = "auditregistration.k8s.io/v1alpha1=true"
+	}
+
 	cluster.ClusterConfig().Cloud.CCMCredentialName = cluster.ClusterConfig().CredentialName
 	cluster.ClusterConfig().Cloud.Linode = &api.LinodeSpec{
 		RootPassword: rand.GeneratePassword(),

@@ -107,6 +107,13 @@ func (cm *ClusterManager) SetDefaultCluster(cluster *api.Cluster, config *api.Cl
 		"cloud-config":   "/etc/kubernetes/azure.json",
 		"cloud-provider": cluster.Spec.Config.Cloud.CloudProvider,
 	}
+
+	if cluster.Spec.AuditSink {
+		cluster.Spec.Config.APIServerExtraArgs["audit-dynamic-configuration"] = "true"
+		cluster.Spec.Config.APIServerExtraArgs["feature-gates"] = "DynamicAuditing=true"
+		cluster.Spec.Config.APIServerExtraArgs["runtime-config"] = "auditregistration.k8s.io/v1alpha1=true"
+	}
+
 	config.Cloud.CCMCredentialName = cluster.Spec.Config.CredentialName
 
 	cred, err := Store(cm.ctx).Owner(cm.owner).Credentials().Get(cluster.Spec.Config.Cloud.CCMCredentialName)
